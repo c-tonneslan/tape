@@ -1,3 +1,4 @@
 from .base import Action, Signal, Strategy
+from .mean_reversion import MeanReversionStrategy
 
-__all__ = ["Action", "Signal", "Strategy"]
+__all__ = ["Action", "MeanReversionStrategy", "Signal", "Strategy"]
