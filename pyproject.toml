@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tape"
+version = "0.1.0"
+description = "A paper-trading bot for the Alpaca paper API"
+license = { text = "MIT" }
+authors = [{ name = "Charlie Tonneslan", email = "cst0520@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "alpaca-py >= 0.40",
+    "pandas >= 2.2",
+    "numpy >= 1.26",
+    "python-dotenv >= 1.0",
+    "anthropic >= 0.40",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest >= 8.0",
+    "ruff >= 0.5",
+]
+
+[project.scripts]
+tape-hello = "scripts.hello_alpaca:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tape"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
