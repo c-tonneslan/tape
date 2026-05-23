@@ -29,8 +29,24 @@ Once `.env` has your paper keys:
 python scripts/hello_alpaca.py
 ```
 
-It fetches the most recent SPY daily bar through the Alpaca paper API and
-prints it. If you see the bar, the connection works.
+It fetches the most recent SPY daily bar through the Alpaca paper API (IEX
+feed, since free paper accounts can't query recent SIP data) and prints it.
+If you see the bar, the connection works.
+
+## macOS install gotcha
+
+On macOS with Python 3.13, `pip install -e .` produces a `.pth` file in the
+venv that gets the `UF_HIDDEN` filesystem flag set. `site.py` then skips it
+as "hidden," so `import tape` from anywhere except the repo root fails.
+`scripts/hello_alpaca.py` works around this by adding the repo root to
+`sys.path` itself, so it always runs. If you hit `ModuleNotFoundError: No
+module named 'tape'` from any other script after a reinstall:
+
+```sh
+chflags nohidden .venv/lib/python3.13/site-packages/*.pth
+```
+
+clears the flag so the editable install becomes visible again.
 
 ## Layout
 

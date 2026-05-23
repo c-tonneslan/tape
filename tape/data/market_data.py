@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
+from alpaca.data.enums import DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
@@ -43,10 +44,12 @@ class MarketDataProvider:
         """Return the most recent daily bar for `symbol`, or None if there is
         no bar in the last ten calendar days (long weekends, holidays).
         """
-        # Alpaca's free historical feed has a ~15-minute SIP delay, so asking
-        # for "right now" can return nothing on intraday queries. Daily bars
-        # are safer for a smoke test, and a 10-day window covers any holiday
-        # cluster.
+        # Free Alpaca paper accounts can't query recent SIP data (the
+        # consolidated feed) — the API returns "subscription does not permit
+        # querying recent SIP data". Use the IEX feed, which is always
+        # available on free accounts and is fine for the smoke test and any
+        # daily-bar work. We can switch to SIP later if/when the account
+        # subscription supports it.
         end = datetime.now(tz=UTC)
         start = end - timedelta(days=10)
 
@@ -55,6 +58,7 @@ class MarketDataProvider:
             timeframe=TimeFrame.Day,
             start=start,
             end=end,
+            feed=DataFeed.IEX,
         )
         response = self._client.get_stock_bars(request)
         bars = response.data.get(symbol, [])

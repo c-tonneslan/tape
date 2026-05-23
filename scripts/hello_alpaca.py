@@ -7,8 +7,17 @@ any strategy or risk work.
 
 from __future__ import annotations
 
-from tape.config import load_settings
-from tape.data import MarketDataProvider
+import sys
+from pathlib import Path
+
+# Make this script work even if the editable install isn't visible. macOS
+# sets UF_HIDDEN on hatchling's editable .pth file, which Python 3.13's
+# site.py treats as "hidden" and skips, so `import tape` fails when running
+# the script outside a context that already has the repo root on sys.path.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from tape.config import load_settings  # noqa: E402
+from tape.data import MarketDataProvider  # noqa: E402
 
 
 def main() -> int:
