@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
+import pandas as pd
 from alpaca.data.enums import DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
@@ -75,3 +76,33 @@ class MarketDataProvider:
             close=float(last.close),
             volume=float(last.volume),
         )
+
+    def historical_daily_bars(
+        self,
+        symbol: str,
+        *,
+        start: datetime,
+        end: datetime,
+    ) -> pd.DataFrame:
+        """Daily OHLCV bars for `symbol` between `start` and `end`.
+
+        Returns a DataFrame indexed by timestamp with open/high/low/close/volume
+        columns, sorted ascending. Empty DataFrame if there's no data.
+        """
+        request = StockBarsRequest(
+            symbol_or_symbols=symbol,
+            timeframe=TimeFrame.Day,
+            start=start,
+            end=end,
+            feed=DataFeed.IEX,
+        )
+        response = self._client.get_stock_bars(request)
+        df = response.df
+        if df.empty:
+            return df
+        # Alpaca returns a MultiIndex (symbol, timestamp). Drop the symbol
+        # level for single-symbol queries so the caller gets a flat
+        # timestamp-indexed DataFrame.
+        if isinstance(df.index, pd.MultiIndex):
+            df = df.xs(symbol, level=0)
+        return df[["open", "high", "low", "close", "volume"]].sort_index()
